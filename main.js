@@ -6,9 +6,23 @@ document.querySelector('form').addEventListener('submit', (e) => {
 function solve() {
   const input = document.querySelector('input').value;
   const tokens = tokenize(input);
+  createNegativeNumbers(tokens);
   solvePart(tokens, '*', '/');
   solvePart(tokens, '+', '-');
   document.querySelector('.solution').innerText = tokens[0];
+}
+
+function createNegativeNumbers(tokens) {
+  for (let i = 0; i < tokens.length; i++) {
+    const token = tokens[i];
+    if (
+      token === '-' &&
+      (i === 0 || isOperation(tokens[i - 1])) &&
+      typeof tokens[i + 1] === 'number'
+    ) {
+      tokens.splice(i, 2, tokens[i + 1] * -1);
+    }
+  }
 }
 
 function solvePart(tokens, operator1, operator2) {
@@ -34,11 +48,12 @@ function tokenize(text) {
       pushNumber(tokens, currentNumberString);
       currentNumberString = '';
     }
-    if (isOperation(character)) tokens.push(character);
+    if (isOperation(character) && (tokens.length !== 0 || character === '-')) {
+      tokens.push(character);
+    }
   }
   pushNumber(tokens, currentNumberString);
   if (isOperation(tokens[tokens.length - 1])) tokens.pop();
-  if (isOperation(tokens[0])) tokens.shift();
   return tokens;
 }
 
