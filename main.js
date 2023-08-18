@@ -17,7 +17,8 @@ function createNegativeNumbers(tokens) {
     const token = tokens[i];
     if (
       token === '-' &&
-      (i === 0 || isOperator(tokens[i - 1])) &&
+      (i === 0 ||
+        (typeof tokens[i - 1] === 'string' && isOperator(tokens[i - 1]))) &&
       typeof tokens[i + 1] === 'number'
     ) {
       tokens.splice(i, 2, tokens[i + 1] * -1);
@@ -48,7 +49,11 @@ function tokenize(text) {
       pushNumber(tokens, currentNumberString);
       currentNumberString = '';
     }
-    if (isOperator(character) && (tokens.length !== 0 || character === '-')) {
+    if (
+      isOperator(character) &&
+      (tokens.some((t) => typeof t === 'number') ||
+        (character === '-' && tokens.length === 0))
+    ) {
       tokens.push(character);
     }
   }
