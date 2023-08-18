@@ -17,7 +17,7 @@ function createNegativeNumbers(tokens) {
     const token = tokens[i];
     if (
       token === '-' &&
-      (i === 0 || isOperation(tokens[i - 1])) &&
+      (i === 0 || isOperator(tokens[i - 1])) &&
       typeof tokens[i + 1] === 'number'
     ) {
       tokens.splice(i, 2, tokens[i + 1] * -1);
@@ -48,12 +48,12 @@ function tokenize(text) {
       pushNumber(tokens, currentNumberString);
       currentNumberString = '';
     }
-    if (isOperation(character) && (tokens.length !== 0 || character === '-')) {
+    if (isOperator(character) && (tokens.length !== 0 || character === '-')) {
       tokens.push(character);
     }
   }
   pushNumber(tokens, currentNumberString);
-  if (isOperation(tokens[tokens.length - 1])) tokens.pop();
+  if (isOperator(tokens[tokens.length - 1])) tokens.pop();
   return tokens;
 }
 
@@ -62,7 +62,7 @@ function pushNumber(tokens, numberString) {
   tokens.push(parseFloat(numberString));
 }
 
-function isOperation(character) {
+function isOperator(character) {
   return /[-+\*\/]/.test(character);
 }
 
@@ -74,12 +74,12 @@ function add(a, b) {
   return a + b;
 }
 
-function calcResultPart(tokens, operationIndex) {
-  const operation = tokens[operationIndex];
-  const operand1 = tokens[operationIndex - 1];
-  const operand2 = tokens[operationIndex + 1];
+function calcResultPart(tokens, operatorIndex) {
+  const operator = tokens[operatorIndex];
+  const operand1 = tokens[operatorIndex - 1];
+  const operand2 = tokens[operatorIndex + 1];
   let newValue;
-  switch (operation) {
+  switch (operator) {
     case '+':
       newValue = operand1 + operand2;
       break;
@@ -93,5 +93,5 @@ function calcResultPart(tokens, operationIndex) {
       newValue = operand1 / operand2;
       break;
   }
-  tokens.splice(operationIndex - 1, 3, newValue);
+  tokens.splice(operatorIndex - 1, 3, newValue);
 }
