@@ -6,24 +6,9 @@ document.querySelector('form').addEventListener('submit', (e) => {
 function solve() {
   const input = document.querySelector('input').value;
   const tokens = tokenize(input);
-  createNegativeNumbers(tokens);
   solvePart(tokens, '*', '/');
   solvePart(tokens, '+', '-');
   document.querySelector('.solution').innerText = tokens[0];
-}
-
-function createNegativeNumbers(tokens) {
-  for (let i = 0; i < tokens.length; i++) {
-    const token = tokens[i];
-    if (
-      token === '-' &&
-      (i === 0 ||
-        (typeof tokens[i - 1] === 'string' && isOperator(tokens[i - 1]))) &&
-      typeof tokens[i + 1] === 'number'
-    ) {
-      tokens.splice(i, 2, tokens[i + 1] * -1);
-    }
-  }
 }
 
 function solvePart(tokens, operator1, operator2) {
@@ -43,18 +28,19 @@ function tokenize(text) {
   let currentNumberString = '';
   for (let i = 0; i < text.length; i++) {
     const character = text.charAt(i);
+    if (!isNumber(character) && !isOperator(character)) continue;
     if (isNumber(character)) {
       currentNumberString += character;
     } else {
       pushNumber(tokens, currentNumberString);
       currentNumberString = '';
     }
-    if (
-      isOperator(character) &&
-      (tokens.some((t) => typeof t === 'number') ||
-        (character === '-' && tokens.length === 0))
-    ) {
-      tokens.push(character);
+    if (isOperator(character)) {
+      if (tokens.length !== 0 && !isOperator(tokens[tokens.length - 1])) {
+        tokens.push(character);
+      } else if (character === '-') {
+        currentNumberString += character;
+      }
     }
   }
   pushNumber(tokens, currentNumberString);
@@ -68,7 +54,7 @@ function pushNumber(tokens, numberString) {
 }
 
 function isOperator(character) {
-  return /[-+\*\/]/.test(character);
+  return /[-+\*\/]/.test(character) && typeof character === 'string';
 }
 
 function isNumber(character) {
