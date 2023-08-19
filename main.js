@@ -6,16 +6,16 @@ document.querySelector('form').addEventListener('submit', (e) => {
 function solve() {
   const input = document.querySelector('input').value;
   const tokens = tokenize(input);
-  solvePart(tokens, '*', '/');
+  solvePart(tokens, '*', '/', '^');
   solvePart(tokens, '+', '-');
   document.querySelector('.solution').innerText = tokens[0];
 }
 
-function solvePart(tokens, operator1, operator2) {
-  while (tokens.includes(operator1) || tokens.includes(operator2)) {
+function solvePart(tokens, ...operators) {
+  while (tokens.some((t) => operators.some((o) => t === o))) {
     for (let i = 0; i < tokens.length; i++) {
       const token = tokens[i];
-      if (token === operator1 || token === operator2) {
+      if (operators.includes(token)) {
         calcResultPart(tokens, i);
         break;
       }
@@ -54,7 +54,7 @@ function pushNumber(tokens, numberString) {
 }
 
 function isOperator(character) {
-  return /[-+\*\/]/.test(character) && typeof character === 'string';
+  return /[-+\*\/^]/.test(character) && typeof character === 'string';
 }
 
 function isNumber(character) {
@@ -82,6 +82,12 @@ function calcResultPart(tokens, operatorIndex) {
       break;
     case '/':
       newValue = operand1 / operand2;
+      break;
+    case '^':
+      newValue = operand1;
+      for (let i = 1; i < operand2; i++) {
+        newValue *= operand1;
+      }
       break;
   }
   tokens.splice(operatorIndex - 1, 3, newValue);
