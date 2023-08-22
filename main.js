@@ -6,9 +6,50 @@ document.querySelector('form').addEventListener('submit', (e) => {
 function solve() {
   const input = document.querySelector('input').value;
   const tokens = tokenize(input);
+  if (countToken(tokens, '(') !== countToken(tokens, ')')) return;
+  solvePartsInBrackets(tokens);
+  solveParts(tokens);
+  document.querySelector('.solution').innerText = tokens[0];
+}
+
+function solvePartsInBrackets(tokens) {
+  while (tokens.includes('(')) {
+    const [startIndex, endIndex] = findBracketIndices(tokens);
+    const innerTokens = tokens.splice(startIndex, endIndex + 1 - startIndex);
+    innerTokens.pop();
+    innerTokens.shift();
+    solveParts(innerTokens);
+    tokens.splice(startIndex, 0, innerTokens[0]);
+  }
+}
+
+function findBracketIndices(tokens) {
+  for (let start = 0; start < tokens.length; start++) {
+    const token = tokens[start];
+    if (token === '(') {
+      for (let end = start + 1; end < tokens.length; end++) {
+        const endToken = tokens[end];
+        if (isBracket(endToken)) {
+          if (endToken === ')') {
+            return [start, end];
+          }
+          break;
+        }
+      }
+    }
+  }
+}
+
+function solveParts(tokens) {
   solvePart(tokens, '*', '/', '^');
   solvePart(tokens, '+', '-');
-  document.querySelector('.solution').innerText = tokens[0];
+}
+
+function countToken(tokens, token) {
+  return tokens.reduce((prev, cur) => {
+    if (cur === token) return prev + 1;
+    return prev;
+  }, 0);
 }
 
 function solvePart(tokens, ...operators) {
@@ -28,7 +69,8 @@ function tokenize(text) {
   let currentNumberString = '';
   for (let i = 0; i < text.length; i++) {
     const character = text.charAt(i);
-    if (!isNumber(character) && !isOperator(character)) continue;
+    if (!isNumber(character) && !isOperator(character) && !isBracket(character))
+      continue;
     if (isNumber(character)) {
       currentNumberString += character;
     } else {
@@ -42,6 +84,7 @@ function tokenize(text) {
         currentNumberString += character;
       }
     }
+    if (isBracket(character)) tokens.push(character);
   }
   pushNumber(tokens, currentNumberString);
   if (isOperator(tokens[tokens.length - 1])) tokens.pop();
@@ -53,16 +96,16 @@ function pushNumber(tokens, numberString) {
   tokens.push(parseFloat(numberString));
 }
 
+function isBracket(character) {
+  return character === '(' || character === ')';
+}
+
 function isOperator(character) {
   return /[-+\*\/^]/.test(character) && typeof character === 'string';
 }
 
 function isNumber(character) {
   return /[0-9.]/.test(character);
-}
-
-function add(a, b) {
-  return a + b;
 }
 
 function calcResultPart(tokens, operatorIndex) {
@@ -84,10 +127,7 @@ function calcResultPart(tokens, operatorIndex) {
       newValue = operand1 / operand2;
       break;
     case '^':
-      newValue = operand1;
-      for (let i = 1; i < operand2; i++) {
-        newValue *= operand1;
-      }
+      newValue = Math.pow(operand1, operand2);
       break;
   }
   tokens.splice(operatorIndex - 1, 3, newValue);
