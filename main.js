@@ -78,7 +78,11 @@ function tokenize(text) {
       currentNumberString = '';
     }
     if (isOperator(character)) {
-      if (tokens.length !== 0 && !isOperator(tokens[tokens.length - 1])) {
+      if (
+        tokens.length !== 0 &&
+        !isOperator(tokens[tokens.length - 1]) &&
+        !isBracket(tokens[tokens.length - 1])
+      ) {
         tokens.push(character);
       } else if (character === '-') {
         currentNumberString += character;
@@ -93,7 +97,8 @@ function tokenize(text) {
 
 function pushNumber(tokens, numberString) {
   if (numberString === '') return;
-  tokens.push(parseFloat(numberString));
+  const number = parseFloat(numberString);
+  if (!isNaN(number)) tokens.push(number);
 }
 
 function isBracket(character) {
